@@ -7,4 +7,4 @@
 （3）校验输入信息
 （4）使用视图控制器
 4、使用数据
-（1）JDBC：使用JdbcTemplate查询数据库、调整领域对象以适应持久化
+（1）JDBC：使用JdbcTemplate查询数据库、调整领域对象以适应持久化、使用JabcTemplate保存数据
