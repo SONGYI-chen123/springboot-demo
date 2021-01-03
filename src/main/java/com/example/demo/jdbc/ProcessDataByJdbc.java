@@ -1,4 +1,4 @@
-package com.example.demo.service.jdbc;
+package com.example.demo.jdbc;
 
 import com.example.demo.entity.Ingredient;
 import org.springframework.jdbc.core.JdbcTemplate;
