@@ -26,17 +26,34 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //    }
 
     //基于JDBC的用户存储
-    @Autowired
-    DataSource dataSource;
+//    @Autowired
+//    DataSource dataSource;
+//
+//    @Override
+//    protected void configure(AuthenticationManagerBuilder auth) throws Exception{
+//        auth.jdbcAuthentication()
+//                .dataSource(dataSource)
+//        .usersByUsernameQuery(
+//                "select username,password, enabled from Users where username=?")
+//        .authoritiesByUsernameQuery(
+//                "select username,authority from UserAuthorities where username=?")
+//        .passwordEncoder(new StandardPasswordEncoder("53cr3t"));
+//    }
 
+    //LDAP作为后端的用户存储
     @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception{
-        auth.jdbcAuthentication()
-                .dataSource(dataSource)
-        .usersByUsernameQuery(
-                "select username,password, enabled from Users where username=?")
-        .authoritiesByUsernameQuery(
-                "select username,authority from UserAuthorities where username=?")
-        .passwordEncoder(new StandardPasswordEncoder("53cr3t"));
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.ldapAuthentication()
+                .userSearchBase("ou=people")
+                .userSearchFilter("(uid={0})")
+                .groupSearchBase("ou=groups")
+                .groupSearchFilter("member={0}")
+                .passwordCompare()
+                .passwordAttribute("passcode")
+                .passwordEncoder(new StandardPasswordEncoder("53cr3t"))
+                .and()
+                .contextSource()
+                .root("dc=tacocloud,dc=com")
+                .ldif("classpath:users.ldif");
     }
 }
