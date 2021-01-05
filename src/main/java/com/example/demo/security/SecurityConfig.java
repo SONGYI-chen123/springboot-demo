@@ -1,13 +1,15 @@
 package com.example.demo.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.StandardPasswordEncoder;
-
-import javax.sql.DataSource;
 
 @Configuration
 @EnableWebSecurity
@@ -41,19 +43,35 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //    }
 
     //LDAP作为后端的用户存储
+//    @Override
+//    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+//        auth.ldapAuthentication()
+//                .userSearchBase("ou=people")
+//                .userSearchFilter("(uid={0})")
+//                .groupSearchBase("ou=groups")
+//                .groupSearchFilter("member={0}")
+//                .passwordCompare()
+//                .passwordAttribute("passcode")
+//                .passwordEncoder(new StandardPasswordEncoder("53cr3t"))
+//                .and()
+//                .contextSource()
+//                .root("dc=tacocloud,dc=com")
+//                .ldif("classpath:users.ldif");
+//    }
+
+    //自定义用户认证
+    @Qualifier("userRepositoryUserDetailService")//指示我们要注入哪个bean
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    @Bean//声明PasswordEncoder bean 对于encoder的任何调用都会被拦截
+    public PasswordEncoder encoder(){
+        return new StandardPasswordEncoder("53cr3t");
+    }
+
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.ldapAuthentication()
-                .userSearchBase("ou=people")
-                .userSearchFilter("(uid={0})")
-                .groupSearchBase("ou=groups")
-                .groupSearchFilter("member={0}")
-                .passwordCompare()
-                .passwordAttribute("passcode")
-                .passwordEncoder(new StandardPasswordEncoder("53cr3t"))
-                .and()
-                .contextSource()
-                .root("dc=tacocloud,dc=com")
-                .ldif("classpath:users.ldif");
+        auth.userDetailsService(userDetailsService)
+        .passwordEncoder(encoder());
     }
 }
