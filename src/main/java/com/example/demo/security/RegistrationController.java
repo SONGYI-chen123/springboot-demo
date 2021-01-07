@@ -26,7 +26,7 @@ public class RegistrationController {
 
     @PostMapping
     public String processRegistration(RegistrationForm form) {
-        userRepository.save(form.toUser(passwordEncoder));
+        userRepository.save(form.toUser(passwordEncoder));//passwordEncoder会在密码保存到数据库前对密码进行转码
         return "redirect:/login";
     }
 }

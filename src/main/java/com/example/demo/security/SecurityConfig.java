@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -73,5 +74,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService)
         .passwordEncoder(encoder());
+    }
+
+    //保护请求，保护一些请求只能被认证用户请求
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.authorizeRequests()
+                .antMatchers("/design","/orders")
+                .hasRole("ROLE_USER")//具备"ROLE_USER"权限的用户才能访问
+                .antMatchers("/","/**")
+                .permitAll();//允许所以用户访问
+        // 声明在前面的安全规则比声明在后面的规则有更高的优先级，交换上面两条安全规则，则对"/design""/orders"的声明不生效
     }
 }
