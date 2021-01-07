@@ -100,6 +100,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .access("permitAll")
                 .and()
                 .formLogin()//实现自定义登录页的路径
-                .loginPage("/login");
+                .loginPage("/login")
+                .loginProcessingUrl("/authenticate")//监听/authenticate请求处理登录信息
+                .usernameParameter("user")
+                .passwordParameter("pwd")
+                .defaultSuccessUrl("/design")//设置登录成功后显示页面
+                .and()
+                .logout()//设置退出
+                .logoutSuccessUrl("/");
     }
 }

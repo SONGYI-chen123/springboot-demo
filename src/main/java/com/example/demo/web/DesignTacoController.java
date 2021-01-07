@@ -3,10 +3,17 @@ package com.example.demo.web;
 import com.example.demo.entity.Ingredient;
 import com.example.demo.entity.Order;
 import com.example.demo.entity.Taco;
+import com.example.demo.entity.User;
+import com.example.demo.jpa.repository.OrderRepository;
+import com.example.demo.jpa.repository.UserRepository;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.support.SessionStatus;
 
 import javax.validation.Valid;
 import java.util.Arrays;
@@ -15,8 +22,10 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
+@AllArgsConstructor
 @RequestMapping("/design")
 public class DesignTacoController {
+    private final OrderRepository orderRepository;
 
     @GetMapping
     public String showDesignForm(Model model) {
@@ -57,11 +66,16 @@ public class DesignTacoController {
     }
 
     @PostMapping("/order")
-    public String processOrder(@Valid Order order, Errors errors) {
+    public String processOrder(@Valid Order order, Errors errors,
+                               @AuthenticationPrincipal User user, SessionStatus sessionStatus) {
         if (errors.hasErrors()) {
             return "orderForm";
         }
         log.info("Order submitted:" + order);
+
+        order.setUser(user);
+        orderRepository.save(order);
+        sessionStatus.setComplete();
         return "redirect:/";
     }
 }
