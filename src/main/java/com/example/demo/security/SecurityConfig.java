@@ -76,14 +76,30 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .passwordEncoder(encoder());
     }
 
-    //保护请求，保护一些请求只能被认证用户请求
+//    //保护请求，保护一些请求只能被认证用户请求
+//    @Override
+//    protected void configure(HttpSecurity http) throws Exception {
+//        http.authorizeRequests()
+//                .antMatchers("/design","/orders")
+//                .hasRole("ROLE_USER")//具备"ROLE_USER"权限的用户才能访问
+//                .antMatchers("/","/**")
+//                .permitAll();//允许所以用户访问
+//        // 声明在前面的安全规则比声明在后面的规则有更高的优先级，交换上面两条安全规则，则对"/design""/orders"的声明不生效
+//    }
+
+    //使用spring表达式来定义认证规则
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
                 .antMatchers("/design","/orders")
-                .hasRole("ROLE_USER")//具备"ROLE_USER"权限的用户才能访问
+                .access("hasRole('ROLE_USER') && " +
+                        "T(java.util.Calendar).getInstance().get("+
+                        "T(java.util.Calendar).DAY_OF_WEEK) =="+
+                        "T(java.util.Calendar).TUESDAY")//只允许ROLE_USER权限的用户在星期二调用
                 .antMatchers("/","/**")
-                .permitAll();//允许所以用户访问
-        // 声明在前面的安全规则比声明在后面的规则有更高的优先级，交换上面两条安全规则，则对"/design""/orders"的声明不生效
+                .access("permitAll")
+                .and()
+                .formLogin()//实现自定义登录页的路径
+                .loginPage("/login");
     }
 }
