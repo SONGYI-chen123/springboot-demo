@@ -6,3 +6,8 @@ spring:
     url: jdbc:mysql://localhost/tacocloud
     username: tacodb
     password: tacopassword
+
+logging:
+  level:
+    root: WARN
+    org.springframework.security: DEBUG

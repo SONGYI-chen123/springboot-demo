@@ -9,3 +9,6 @@
 4、保护Spring
 （1）Spring Security
 （2）配置用户存储，通过覆盖WebSecurityConfigurerAdapter基础配置中的configure（）方法配置
+5、配置
+（1）数据库的配置
+（2）配置日志
