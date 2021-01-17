@@ -8,6 +8,7 @@ import com.example.demo.jpa.repository.OrderRepository;
 import com.example.demo.jpa.repository.TacoRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -75,11 +77,11 @@ public class DesignTacoController {
     }
 
     @PostMapping
-    public String processDesign(@Valid @ModelAttribute("design") Taco design, Errors errors){
-        if (errors.hasErrors()){
+    public String processDesign(@Valid @ModelAttribute("design") Taco design, Errors errors) {
+        if (errors.hasErrors()) {
             return "design";
         }
-        log.info("Processing design: "+design);
+        log.info("Processing design: " + design);
         return "redirect:/orders/current";
     }
 
@@ -100,7 +102,7 @@ public class DesignTacoController {
     @GetMapping("/recent")
     public Iterable<Taco> recentTacos() {
         PageRequest page = PageRequest.of(
-                0,12, Sort.by("createdAt").descending());
+                0, 12, Sort.by("createdAt").descending());
         return tacoRepository.findAll(page);
     }
 
@@ -124,18 +126,28 @@ public class DesignTacoController {
     public Order putOrder(@RequestBody Order order) {
         return orderRepository.save(order);
     }
+
     //patch为局部更新，但@PatchMapping和@PutMapping只能指定这个方法实现什么请求，真正的实现需要自己手动实现
     @PatchMapping(path = "/{orderId}", consumes = "application/json")
     public Order patchOrder(@PathVariable("orderId") Long orderId,
                             @RequestBody Order order) {
         Order oldOrder = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NullPointerException("order is not exist"));
-        if (oldOrder.getCcExpiration()!=null) {
+        if (oldOrder.getCcExpiration() != null) {
             oldOrder.setCcExpiration(order.getCcExpiration());
         }
-        if (oldOrder.getCcCVV()!=null) {
+        if (oldOrder.getCcCVV() != null) {
             oldOrder.setCcCVV(order.getCcCVV());
         }
         return orderRepository.save(oldOrder);
+    }
+
+    @DeleteMapping("/{orderId}")
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    public void deleteOrder(@PathVariable("orderId") Long orderId) {
+        try {
+            orderRepository.deleteById(orderId);
+        } catch (EmptyResultDataAccessException e) {
+        }//捕获EmptyResultDataAccessException异常，但什么都不做
     }
 }
